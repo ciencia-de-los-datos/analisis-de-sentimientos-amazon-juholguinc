@@ -21,22 +21,24 @@ def pregunta_01():
     # Lea el archivo `amazon_cells_labelled.tsv` y cree un DataFrame usando pandas.
     # Etiquete la primera columna como `msg` y la segunda como `lbl`. Esta función
     # retorna el dataframe con las dos columnas.
-    df = ____(
-        ____,
-        sep=____,
-        header=____,
-        names=____,
+    df = pd.read_csv(
+        "amazon_cells_labelled.tsv",
+        sep='\t',
+        encoding = 'utf-8',
+        header=None,
+        names=['msg','lbl'],
     )
 
+
     # Separe los grupos de mensajes etiquetados y no etiquetados.
-    df_tagged = ____[____["____"].____()]
-    df_untagged = ____[____["____"].____()]
+    df_tagged = df[(df['lbl'] == 1) | (df['lbl'] == 0)]
+    df_untagged =df[df['lbl'].isnull()]
 
-    x_tagged = ____["____"]
-    y_tagged = ____["____"]
+    x_tagged = df_tagged["msg"]
+    y_tagged = df_tagged["lbl"]
 
-    x_untagged = ____["____"]
-    y_untagged = ____["____"]
+    x_untagged = df_untagged["msg"]
+    y_untagged = df_untagged["lbl"]
 
     # Retorne los grupos de mensajes
     return x_tagged, y_tagged, x_untagged, y_untagged
@@ -49,20 +51,18 @@ def pregunta_02():
     """
 
     # Importe train_test_split
-    from ____ import ____
-
+    from sklearn.model_selection import train_test_split
     # Cargue los datos generados en la pregunta 01.
-    x_tagged, y_tagged, _, _ = pregunta_01()
+    x_tagged, y_tagged, xa, yb = pregunta_01()
 
     # Divida los datos de entrenamiento y prueba. La semilla del generador de números
     # aleatorios es 12345. Use el 10% de patrones para la muestra de prueba.
     x_train, x_test, y_train, y_test = train_test_split(
-        ____,
-        ____,
-        test_size=____,
-        random_state=____,
+        x_tagged,
+        y_tagged,
+        test_size=0.1,
+        random_state=12345,
     )
-
     # Retorne `X_train`, `X_test`, `y_train` y `y_test`
     return x_train, x_test, y_train, y_test
 
@@ -74,13 +74,15 @@ def pregunta_03():
     """
     # Importe el stemmer de Porter
     # Importe CountVectorizer
-    from ____ import ____
+    from nltk.stem.porter import PorterStemmer
+    from sklearn.feature_extraction.text import CountVectorizer
 
     # Cree un stemeer que use el algoritmo de Porter.
-    stemmer = ____
+    stemmer = PorterStemmer()
 
     # Cree una instancia del analizador de palabras (build_analyzer)
-    analyzer = ____().____()
+    vectorizer3 = CountVectorizer(analyzer="word",token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z]+\b", lowercase=True)
+    analyzer = vectorizer3.build_analyzer()
 
     # Retorne el analizador de palabras
     return lambda x: (stemmer.stem(w) for w in analyzer(x))
@@ -200,3 +202,4 @@ def pregunta_06():
 
     # Retorne el vector de predicciones
     return y_untagged_pred
+
